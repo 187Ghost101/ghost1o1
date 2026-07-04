@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GHOST1O1 NOCTURNE — Pentest Arsenal Hub</title>
+<style>
+:root{--bg:#0a0a0f;--bg2:#0f0f1a;--bg3:#141428;--border:#1a1a35;--accent:#e63946;--cyan:#00d4ff;--green:#2ecc71;--text:#c8c8d0;--text2:#8888a0}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono','Consolas',monospace;min-height:100vh;padding:30px}
+header{text-align:center;margin-bottom:40px;padding:30px;border:1px solid var(--accent);border-radius:8px;background:linear-gradient(135deg,#0a0a0f 0%,#1a0a1a 100%)}
+header h1{font-size:42px;color:var(--accent);letter-spacing:6px;text-shadow:0 0 20px rgba(230,57,70,0.5)}
+header .sub{color:var(--cyan);margin-top:8px;font-size:13px;letter-spacing:2px}
+header .tag{color:var(--text2);margin-top:12px;font-style:italic;font-size:11px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:20px;max-width:1400px;margin:0 auto}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:all 0.3s}
+.card:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 8px 20px rgba(230,57,70,0.2)}
+.card .head{background:var(--bg3);padding:15px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card .head h2{font-size:16px;color:var(--accent);letter-spacing:1px}
+.card .head .ver{color:var(--cyan);font-size:10px}
+.card .body{padding:20px}
+.card .body p{color:var(--text2);font-size:11px;line-height:1.6;margin-bottom:12px}
+.card .body ul{list-style:none;margin:12px 0}
+.card .body li{padding:4px 0;color:var(--text);font-size:11px}
+.card .body li::before{content:"▸ ";color:var(--accent)}
+.card .actions{display:flex;gap:8px;padding:0 20px 20px;flex-wrap:wrap}
+.btn{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 14px;text-decoration:none;font-size:11px;border-radius:3px;display:inline-block;transition:all 0.2s}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.cyan{border-color:var(--cyan);color:var(--cyan)}
+.btn.green{border-color:var(--green);color:var(--green)}
+footer{text-align:center;margin-top:50px;color:var(--text2);font-size:10px;letter-spacing:1px}
+footer .sig{color:var(--accent);font-size:14px;margin-top:8px;letter-spacing:3px}
+</style>
+</head>
+<body>
+<header>
+  <h1>GHOST1O1</h1>
+  <div class="sub">⚡ NOCTURNE PENTEST ARSENAL — v3.0 ULTIMATE ⚡</div>
+  <div class="tag">"There is no lock." — ghost1o1</div>
+</header>
+
+<div class="grid">
+  <div class="card">
+    <div class="head"><h2>🧬 BioBypass-Pro</h2><span class="ver">v11.0</span></div>
+    <div class="body">
+      <p>WebAuthn biometric authentication bypass framework. Multi-vector attacks against FIDO2/WebAuthn implementations, MFA evasion, and assertion forgery.</p>
+      <ul>
+        <li>WebAuthn protocol exploitation</li>
+        <li>Biometric bypass techniques</li>
+        <li>Assertion replay & forgery</li>
+        <li>5-layer GHOST1O1 signature</li>
+      </ul>
+    </div>
+    <div class="actions">
+      <a class="btn primary" href="https://github.com/187Ghost101/biobypass" target="_blank">GITHUB</a>
+      <a class="btn" href="biobypass/README.md">README</a>
+      <a class="btn" href="biobypass/INSTALL.md">INSTALL</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="head"><h2>👁 GHOSTEYE</h2><span class="ver">v12.0 NOCTURNE</span></div>
+    <div class="body">
+      <p>IP camera reconnaissance & exploitation platform. HLS live streaming, ONVIF discovery, port scanning, RTSP brute force with 55+ paths.</p>
+      <ul>
+        <li>9 recon panels (Streams/Shodan/ONVIF/PortScan/RTSP/Discovery/Creds/Exploit/Shells)</li>
+        <li>5 cameras mapped on reference mission</li>
+        <li>2 RCE confirmed (Hikvision CVE-2021-36260, Dahua RPC2)</li>
+        <li>Python proxy + tunnel-ready</li>
+      </ul>
+    </div>
+    <div class="actions">
+      <a class="btn primary" href="https://github.com/187Ghost101/ghosteye" target="_blank">GITHUB</a>
+      <a class="btn" href="ghosteye/README.md">README</a>
+      <a class="btn" href="ghosteye/INSTALL.md">INSTALL</a>
+      <a class="btn cyan" href="ghosteye/index.html">DASHBOARD</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="head"><h2>🎨 ghost1o1-design</h2><span class="ver">v1.1</span></div>
+    <div class="body">
+      <p>Shared design system: ghost1o1.css (34KB) + ghost1o1.js (10KB). 5-layer GHOST1O1 signature system used across all 6 projects.</p>
+      <ul>
+        <li>Watermark layer (.09 opacity)</li>
+        <li>Corner stamp vertical</li>
+        <li>Brand mark topbar</li>
+        <li>Signature block + inline</li>
+      </ul>
+    </div>
+    <div class="actions">
+      <a class="btn primary" href="https://github.com/187Ghost101/ghost1o1-design" target="_blank">GITHUB</a>
+      <a class="btn" href="ghost1o1-design/README.md">README</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="head"><h2>📷 ycc365-ghost</h2><span class="ver">v1.3 NOCTURNE</span></div>
+    <div class="body">
+      <p>YCC365 Android IoT camera security research. 55 files including scanner, dashboard, Android sources, and threat model documentation.</p>
+      <ul>
+        <li>Android F-Droid-compatible APK build</li>
+        <li>Python scanner (RTSP brute, ONVIF, port scan)</li>
+        <li>Live dashboard with HLS streaming</li>
+        <li>Architecture + Threat Model wiki</li>
+      </ul>
+    </div>
+    <div class="actions">
+      <a class="btn primary" href="https://github.com/187Ghost101/ycc365-ghost" target="_blank">GITHUB</a>
+      <a class="btn" href="ycc365-ghost/README.md">README</a>
+      <a class="btn" href="ycc365-ghost/INSTALL.md">INSTALL</a>
+      <a class="btn cyan" href="ycc365-ghost/dashboard/index.html">DASHBOARD</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="head"><h2>🎣 phishcloner-ultimate</h2><span class="ver">v3.0</span></div>
+    <div class="body">
+      <p>Phishing infrastructure cloners + C2 admin panel. 32 files: 40+ templates, Docker engine, c2_admin.html, setup.sh.</p>
+      <ul>
+        <li>40+ phishing templates (banks, social, crypto)</li>
+        <li>Docker-based deployment</li>
+        <li>Real-time C2 admin panel</li>
+        <li>Auto-credential capture</li>
+      </ul>
+    </div>
+    <div class="actions">
+      <a class="btn primary" href="https://github.com/187Ghost101/phishcloner-ultimate" target="_blank">GITHUB</a>
+      <a class="btn" href="phishcloner-ultimate/README.md">README</a>
+      <a class="btn" href="phishcloner-ultimate/INSTALL.md">INSTALL</a>
+      <a class="btn cyan" href="phishcloner-ultimate/c2_admin.html">C2 PANEL</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="head"><h2>⚜ quebec-ultimate</h2><span class="ver">v3.0 NOCTURNE</span></div>
+    <div class="body">
+      <p>OSINT Chain — Quebec-focused intelligence platform. nocturne.html portal with multi-source aggregation, dark web monitoring, and person-of-interest tracking.</p>
+      <ul>
+        <li>Multi-source OSINT aggregation</li>
+        <li>Quebec-specific data sources</li>
+        <li>Dark web monitoring</li>
+        <li>Person-of-interest linking</li>
+      </ul>
+    </div>
+    <div class="actions">
+      <a class="btn primary" href="https://github.com/187Ghost101/quebec-ultimate" target="_blank">GITHUB</a>
+      <a class="btn" href="quebec-ultimate/README.md">README</a>
+      <a class="btn" href="quebec-ultimate/INSTALL.md">INSTALL</a>
+      <a class="btn cyan" href="quebec-ultimate/nocturne.html">PORTAL</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div>6 projects • 187+ files • GHOST1O1 NOCTURNE v3.0 ULTIMATE</div>
+  <div class="sig">G H O S T 1 O 1</div>
+</footer>
+</body>
+</html>
