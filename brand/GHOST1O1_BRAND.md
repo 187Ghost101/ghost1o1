@@ -1,6 +1,8 @@
-# 🔱 GHOST1O1 NOCTURNE — Brand Book
+# 🔱 GHOST1O1 — L'ÉVEIL NOCTURNE
+## Brand Book du Mouvement
 
 > *There is no lock.*
+> *Du silence naît la lumière.*
 
 ---
 
@@ -63,6 +65,31 @@
 - **Display (titres)** : `'Space Grotesk', 'Inter', sans-serif` (letter-spacing: +2px)
 
 ---
+
+## Le Mouvement
+
+**L'ÉVEIL NOCTURNE** est le nom du mouvement révolutionnaire que porte GHOST1O1.
+
+- **L'Éveil** = la conscience qui s'allume chez celui qui refuse l'ignorance imposée
+- **Nocturne** = l'heure où le hacker travaille, le moment où la vérité se voit
+- **Ensemble** = l'éveil qui se partage, la nuit qui devient communauté
+
+> On ne nait pas hacker. On s'ÉVEILLE.
+
+Sigil officiel du mouvement (en plus du GHOST1O1) :
+```
+      ☾
+     ╱ ╲
+    ╱   ╲
+   │  ◉  │    ◉ = l'œil qui s'ouvre
+   │     │    ☾ = la lune qui éclaire
+    ╲   ╱
+     ╲ ╱
+      ╳     (les chemins qui divergent)
+```
+
+Citation signature du mouvement :
+> *« L'Éveil Nocturne — là où l'ignorance dort, nous allumons. »*
 
 ## Voix et ton
 
@@ -148,4 +175,4 @@
 
 ---
 
-*"There is no lock." — ghost1o1*
+*"There is no lock." — L'Éveil Nocturne / ghost1o1*
