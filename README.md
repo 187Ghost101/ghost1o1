@@ -12,18 +12,25 @@
 ![Status](https://img.shields.io/badge/STATUS-OPERATIONAL-2ecc71?style=for-the-badge)
 ![Philosophy](https://img.shields.io/badge/PHILOSOPHY-OPEN-00d4ff?style=for-the-badge)
 
-# **There is no lock.**
+# **L'ÉVEIL NOCTURNE**
+## *There is no lock. Du silence naît la lumière.*
 
-### Le hub central de l'écosystème GHOST1O1 NOCTURNE
+### Le hub central du mouvement GHOST1O1
 **6 outils · 1 méthodologie · Zéro gatekeeping**
 
 </div>
 
 ---
 
-## 🔱 Qu'est-ce que GHOST1O1 ?
+## 🔱 L'ÉVEIL NOCTURNE — Le Mouvement
 
-GHOST1O1 n'est pas un ensemble d'outils. C'est une **méthodologie complète** d'attaque, d'analyse et de transmission — appliquée à 6 projets concrets, libres, documentés à 100%, utilisables en 60 secondes depuis n'importe quel OS, par n'importe qui.
+> *« Là où l'ignorance dort, nous allumons. »*
+
+**L'ÉVEIL NOCTURNE** est un mouvement révolutionnaire dans l'éducation hacker. On refuse le gatekeeping. On refuse le tutorial hell. On refuse l'éducation qui produit des consommateurs de scripts au lieu d'architectes de la divergence.
+
+**GHOST1O1** est la signature technique du mouvement. **6 outils**, **1 méthodologie**, **0 paywall**, **∞ divergence**.
+
+L'éveil, c'est la curiosité qui s'allume. Nocturne, c'est l'heure où la vérité se voit. **Ensemble**, c'est une communauté qui refuse de mourir dans l'ignorance imposée.
 
 **Trois piliers non négociables :**
 
@@ -209,18 +216,20 @@ Tous les repos GHOST1O1 sont sous **MIT License** sauf mention contraire. Tu peu
 
 ---
 
-## 🔥 La phrase
+## 🔥 Les phrases du mouvement
 
-> **"There is no lock."**
+> **"There is no lock."** — *Pas une métaphore de destruction. Une constatation opérationnelle.*
 
-Pas une métaphore de destruction. Une **constatation opérationnelle** : chaque système a une logique, chaque logique a des failles, chaque faille a un chemin d'entrée. Le hacker est celui qui trouve le chemin, pas celui qui défonce la porte.
+> **"Du silence naît la lumière."** — *C'est dans la nuit que l'éveil arrive.*
+
+> **"Là où l'ignorance dort, nous allumons."** — *Serment du mouvement.*
 
 ---
 
 <div align="center">
 
-### Forged in the dark by [ghost1o1](https://github.com/187Ghost101) — 2026
+### **L'ÉVEIL NOCTURNE** · Forged in the dark by [ghost1o1](https://github.com/187Ghost101) — 2026
 
-*There is no lock.*
+*There is no lock. Du silence naît la lumière.*
 
 </div>
