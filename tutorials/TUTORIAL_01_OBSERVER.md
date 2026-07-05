@@ -1,350 +1,432 @@
-# 🎓 TUTORIAL 01 — OBSERVER un réseau comme ghost1o1
+# 🔱 TUTORIAL 01 — OBSERVER
 
-> **Du WiFi au premier device en 7 étapes**
->
-> Méthodologie : Protocole GHOST1O1 · Phase 1
->
-> Niveau : Débutant→Intermédiaire · Durée : 45 min
->
-> Outils : `ghosteye`, `nmap`, `netdiscover`, `arp-scan`
+## *La première phase du protocole GHOST1O1*
+
+> *Le tireur d'élite observe sa cible 10x plus longtemps qu'il ne tire.*
+
+**Série :** Protocole GHOST1O1
+**Niveau :** Débutant → Intermédiaire
+**Durée :** 45-60 minutes
+**Prérequis :** Linux/Kali basics, un réseau de test
 
 ---
 
 ## 1. PHILOSOPHIE
 
-Observer, c'est **comprendre** avant d'agir. C'est la phase 1 du protocole GHOST1O1, et c'est la plus critique.
+**Pourquoi "Observer" en premier ?**
 
-**Trois erreurs classiques du newbee :**
-1. Lancer un scan `-p-` (1-65535) dès l'arrivée sur un réseau. **Bruit, détection, perte de temps.**
-2. Croire qu'un seul outil suffit. **Un hacker qui n'a qu'un outil n'est pas un hacker.**
-3. Ne jamais cartographier avant d'attaquer. **Tu casses ce que tu ne comprends pas.**
+Dans 95% des pentests ratés, la cause est la même : on a tiré avant d'avoir vu. On a scanné tout /24 sans comprendre ce qu'on cherche. On a lancé un exploit sur un service qu'on n'a pas identifié. Résultat : on a perdu du temps, déclenché des alertes, et on n'a souvent rien appris.
 
-**La règle du tireur d'élite :** tu observes 10× plus longtemps que tu n'agis.
+**Observer, c'est pas passif.** C'est l'étape la plus active de toute la mission. C'est là où tu passes **plus de temps à regarder qu'à toucher**. C'est là où tu dessines la cible dans ta tête avant d'agir.
 
-**À la fin de ce tutoriel, tu sauras :**
-- Identifier le subnet sur lequel tu te trouves
-- Découvrir les devices actifs sans bruit excessif
-- Identifier les services exposés
-- Comprendre la **logique du réseau** (qui est qui, qui parle à qui)
-- Documenter tes observations de manière structurée
+**Trois erreurs classiques que ce tutoriel corrige :**
+- ❌ "Je scanne tout" → le bruit te fait perdre l'information
+- ❌ "Je vais direct à l'exploit" → tu casses sans comprendre
+- ❌ "J'observe avec un seul outil" → chaque outil a un angle mort
+
+**L'objectif de ce tutoriel :** tu sors avec une **méthode d'observation** applicable immédiatement, qui marche sur n'importe quelle cible (caméra, routeur, app web, réseau d'entreprise).
 
 ---
 
 ## 2. PRÉREQUIS
 
 ### Connaissances
-- Savoir ouvrir un terminal
-- Savoir taper `cd`, `ls`, `cat`
-- Connaître la différence entre une IP, un port, un protocole
+- Commandes Linux de base (`ls`, `cd`, `cat`, `grep`)
+- Notion de réseau (IP, port, protocole)
+- Avoir déjà utilisé `nmap` (même rapidement)
+
+### Matériel
+- Une machine Linux (Kali recommandé, Ubuntu OK, Arch OK)
+- Une **cible de test** : ton propre réseau / un lab / un service de test public
+- 2-3h devant toi (ce tutoriel + la pratique)
 
 ### Outils
-- **Kali Linux** (ou Debian/Ubuntu) — [kali.org](https://www.kali.org/get-kali/)
-- **Python 3.10+** — préinstallé sur Kali
-- **nmap** — préinstallé sur Kali, sinon `sudo apt install nmap`
-- **ghosteye** — cloné depuis GitHub
+- `nmap` (scan réseau)
+- `ghosteye` (notre outil GHOST1O1 — optionnel mais recommandé)
+- `netdiscover` ou `arp-scan` (ARP discovery)
+- `tshark` ou `tcpdump` (capture passive)
+- Un éditeur de notes (Obsidian, Notion, vim, même un .txt)
 
-### Réseau
-- Un réseau local à auditer (**le tien**, ou un lab)
-- Une connexion WiFi ou Ethernet
+### Cible d'entraînement (si t'as rien)
 
-### ⚠️ Légalité
-**Tu ne fais ça QUE sur :**
-- Ton propre réseau domestique
-- Un lab (VMs isolées)
-- Un réseau avec **autorisation écrite**
-
-Auditer le WiFi de ton voisin = **illégal**. C'est pas GHOST1O1, c'est pas du hacking, c'est juste un crime.
-
----
-
-## 3. THÉORIE — Comment fonctionne un réseau local
-
-### Le modèle OSI en 3 lignes
-- **Couche 1 (Physique)** : câbles, ondes WiFi
-- **Couche 2 (Liaison)** : adresses MAC, switches
-- **Couche 3 (Réseau)** : adresses IP, routeurs
-- **Couche 7 (Application)** : HTTP, SSH, RTSP
-
-**Pour observer, tu utilises principalement les couches 2 et 3.**
-
-### ARP — Le protocole magique
-**Address Resolution Protocol** (ARP) traduit IP → MAC. Quand un device veut parler à un autre, il demande "qui a 192.168.1.1 ?" sur tout le réseau (broadcast ARP). Le device ciblé répond.
-
-**Conséquence pratique :** tu peux **voir tous les devices actifs** d'un réseau juste en envoyant des requêtes ARP. C'est ce que font `arp-scan` et `netdiscover`.
-
-### TCP/UDP — Les protocoles de transport
-- **TCP** : connexion fiable, 3-way handshake (SYN, SYN-ACK, ACK)
-- **UDP** : sans connexion, plus rapide, moins fiable
-
-**Pour identifier un service :** tu te connectes sur un port, tu lis le **banner** (la première réponse du serveur).
-
-### Les phases d'un scan TCP (avec nmap)
-1. **SYN scan** (`-sS`) : tu envoies SYN, le serveur répond SYN-ACK, tu termines sans ACK → furtif
-2. **Connect scan** (`-sT`) : connexion complète, plus visible mais compatible partout
-3. **Version detection** (`-sV`) : tu lis le banner pour identifier le service
-4. **OS detection** (`-O`) : tu analyses les réponses pour deviner l'OS
-
----
-
-## 4. PRATIQUE — 7 étapes concrètes
-
-### Étape 1 — Identifier ton réseau
-
+**Option A — Ton LAN :**
 ```bash
-# Trouve ton IP locale
-ip addr show wlan0 | grep inet
-# → inet 192.168.1.42/24
-
-# OU plus simple
-hostname -I
-# → 192.168.1.42
-
-# Ta passerelle (routeur)
 ip route | grep default
-# → default via 192.168.1.1 dev wlan0
+# Note l'IP de ta passerelle (souvent 192.168.1.1 ou 10.0.0.1)
+# C'est un bon point de départ "safe"
 ```
 
-**Output attendu :** `inet 192.168.1.42/24` et `default via 192.168.1.1 dev wlan0`
+**Option B — Service de test public :**
+- `scanme.nmap.org` (Nmap's officiel test target)
+- `testphp.vulnweb.com` (Acunetix)
+- `hackthebox.com` (machine d'entraînement)
 
-**Ce que tu apprends :** tu es sur `192.168.1.0/24`, ta passerelle est `192.168.1.1`.
+**Option C — Ton propre service :**
+```bash
+# Lancer un faux service en local
+python3 -m http.server 8000
+# Ou
+nc -lvp 9999
+```
 
 ---
 
-### Étape 2 — Découverte passive (zéro bruit)
+## 3. THÉORIE — Comment ça marche VRAIMENT
 
-```bash
-# Ta table ARP locale (devices que tu as déjà contactés)
-ip neigh show
-# → 192.168.1.1 dev wlan0 lladdr aa:bb:cc:dd:ee:ff REACHABLE
-# → 192.168.1.77 dev wlan0 lladdr 11:22:33:44:55:66 STALE
+### Le modèle OSI et où on regarde
+
+```
+OSI Layer    | Protocol    | Outil
+-------------|-------------|------------------
+7. App       | HTTP, RTSP  | curl, navigateur, ghosteye
+6. Présent.  | TLS         | openssl s_client
+5. Session   | -           | -
+4. Transport | TCP, UDP    | nmap -sT/-sU
+3. Réseau    | IP, ICMP    | nmap -sn, ping, traceroute
+2. Liaison   | ARP, MAC    | arp-scan, netdiscover
+1. Physique  | -           | iwconfig, rfkill
 ```
 
-**Ce que tu apprends :** sans rien envoyer, tu sais déjà quels devices tu as contactés récemment. Le routeur + la caméra 192.168.1.77.
+**Observer = passer au moins une fois par chaque couche.**
 
-**Pourquoi c'est passif :** ta table ARP est construite par le trafic légitime. Tu ne génères aucun paquet.
+### Les trois types d'observation
+
+**1. Passive (zéro interaction avec la cible) :**
+- Écoute du trafic (tshark, tcpdump)
+- Captures ARP (arp-scan en listen-only)
+- OSINT (whois, DNS, certs)
+
+**Avantage :** indétectable. **Limite :** tu ne vois que ce qui passe.
+
+**2. Active slow (interaction minimale) :**
+- Ping simple (`-sn`)
+- DNS queries
+- HTTP HEAD (pas GET)
+
+**Avantage :** déjà plus d'info. **Détectable :** oui, mais discrète.
+
+**3. Active full (scan complet) :**
+- Nmap version detection (`-sV`)
+- Nmap scripts (`-sC`)
+- Brute force (ghosteye, hydra)
+
+**Avantage :** exhaustif. **Détectable :** très visible dans les logs.
+
+**Règle GHOST1O1 :** commence toujours **passive**, puis **active slow**, puis **active full** seulement si nécessaire.
+
+### Le concept de "surface d'attaque"
+
+À la fin de l'observation, tu dois pouvoir répondre à :
+
+1. **Quelles machines ?** (hosts up)
+2. **Quels services ?** (ports ouverts)
+3. **Quelles versions ?** (banner grabbing)
+4. **Quelles relations ?** (qui parle à qui)
+5. **Quels flux ?** (volume, fréquence, protocoles)
+6. **Quels points d'attention ?** (versions vulnérables, services exposés)
+
+**Ces 6 réponses = la base de tout le reste.**
 
 ---
 
-### Étape 3 — Découverte active (faible bruit)
+## 4. PRATIQUE — Pas à pas
+
+### Étape 1 — Setup et cible
 
 ```bash
-# Ping sweep du /24
-nmap -sn 192.168.1.0/24
+# Crée ton dossier de mission
+mkdir -p ~/mission_observer
+cd ~/mission_observer
+export MISSION=$(pwd)
+
+# Note la date
+date > mission_meta.txt
+echo "Cible: 192.168.1.0/24" >> mission_meta.txt
 ```
 
-**Output :**
-```
-Nmap scan report for 192.168.1.1
-Host is up (0.0050s latency).
-MAC Address: AA:BB:CC:DD:EE:FF (Tp-link Technologies)
-Nmap scan report for 192.168.1.77
-Host is up (0.012s latency).
-MAC Address: 11:22:33:44:55:66 (Hikvision)
-Nmap scan report for 192.168.1.88
-Host is up (0.008s latency).
-MAC Address: 22:33:44:55:66:77 (Dahua)
-Nmap done: 256 IP addresses (4 hosts up) scanned in 3.2 seconds
-```
-
-**Ce que tu apprends :** 4 devices up, dont 2 caméras (Hikvision + Dahua identifiées par MAC OUI).
-
-**Niveau de bruit :** faible. `-sn` ne fait que des pings, pas de scan de ports.
-
----
-
-### Étape 4 — Scan focalisé sur les devices intéressants
+### Étape 2 — Observation passive (15 min)
 
 ```bash
-# Scan rapide (top 100 ports) sur les caméras
-nmap -sV -T4 192.168.1.77,88
+# ARP discovery (silent listen)
+sudo arp-scan --localnet --quiet | tee ${MISSION}/01_arp.txt
+# Output:
+# 192.168.1.1   aa:bb:cc:dd:ee:ff   (Unknown)
+# 192.168.1.77  11:22:33:44:55:66   (Hikvision)
+# 192.168.1.88  99:88:77:66:55:44   (Dahua)
+
+# Note ce que tu as vu (5 hosts par exemple)
+echo "[+] 5 hosts discovered" >> ${MISSION}/mission_meta.txt
 ```
 
-**Output :**
-```
-Nmap scan report for 192.168.1.77
-PORT     STATE SERVICE     VERSION
-80/tcp   open  http        Hikvision-Webs
-554/tcp  open  rtsp        Hikvision RTSP
-8899/tcp open  sadp        Hikvision SADP
-MAC Address: 11:22:33:44:55:66 (Hikvision)
-
-Nmap scan report for 192.168.1.88
-PORT     STATE SERVICE     VERSION
-80/tcp   open  http        Dahua-httpd
-37777/tcp open  dahua      Dahua DVR
-MAC Address: 22:33:44:55:66:77 (Dahua)
+**Alternative (sans sudo) :**
+```bash
+# Netdiscover en mode passif
+netdiscover -p -r 192.168.1.0/24
 ```
 
-**Ce que tu apprends :**
-- 192.168.1.77 = Hikvision (web + RTSP + SADP)
-- 192.168.1.88 = Dahua (web + port DVR propriétaire)
-
----
-
-### Étape 5 — Identification précise (banner grabbing)
+### Étape 3 — Capture passive du trafic (5 min)
 
 ```bash
-# HTTP headers
-curl -sI http://192.168.1.77
-# → Server: Hikvision-Webs/1.0
-# → WWW-Authenticate: Basic realm="IP Camera"
-# → Connection: close
+# Lance une capture en background (10s)
+sudo timeout 10 tshark -i eth0 -a duration:10 -w ${MISSION}/02_capture.pcap
 
-curl -sI http://192.168.1.88
-# → Server: Dahua httpd/1.0
-# → WWW-Authenticate: Basic realm="Dahua"
+# Analyse les hosts qui parlent
+tshark -r ${MISSION}/02_capture.pcap -q -z conv,ip | tee ${MISSION}/03_conversations.txt
+# Output:
+# Conversations IP
+# 192.168.1.77 <-> 192.168.1.1   50 packets
+# 192.168.1.88 <-> 8.8.8.8       12 packets
+# ...
 ```
 
-**Ce que tu apprends :** les deux caméras utilisent Basic Auth. Le serveur s'identifie clairement → modèles précis possibles.
+**Ce que tu apprends :** qui initie les connexions, vers où, à quelle fréquence. **C'est la VRAIE topologie de la cible.**
 
----
-
-### Étape 6 — Cartographie ONVIF (caméras uniquement)
+### Étape 4 — Active slow (10 min)
 
 ```bash
-# Lance ghosteye
-cd ~/ghosteye
+# Ping sweep (détecte les hosts up)
+nmap -sn 192.168.1.0/24 | tee ${MISSION}/04_ping_sweep.txt
+
+# Pour chaque host, DNS reverse
+for ip in $(cat ${MISSION}/04_ping_sweep.txt | grep "Nmap scan report" | awk '{print $NF}'); do
+  echo "=== $ip ===" | tee -a ${MISSION}/05_dns_reverse.txt
+  dig -x $ip +short | tee -a ${MISSION}/05_dns_reverse.txt
+done
+```
+
+**Output exemple :**
+```
+=== 192.168.1.77 ===
+hikvision-cam-1.lan.
+```
+
+→ Tu sais maintenant que **192.168.1.77 = une caméra Hikvision**.
+
+### Étape 5 — Active full ciblé (15 min)
+
+**⚠️ Ne scanner QUE les hosts qui ont une raison d'être scannés.**
+
+```bash
+# Pour chaque caméra identifiée
+GHosteye="192.168.1.77"
+
+# Service version
+nmap -sV -p 80,554,8899,37777 ${GHOST} | tee ${MISSION}/06_nmap_${GHOST}.txt
+
+# Scripts par défaut
+nmap -sC -p 80 ${GHOST} | tee -a ${MISSION}/06_nmap_${GHOST}.txt
+
+# Avec ghosteye (si installé)
 python3 ghosteye_proxy.py 8082 &
-
-# Probe ONVIF
-curl -X POST http://localhost:8082/onvif/probe \
+curl -s -X POST http://localhost:8082/onvif/probe \
   -H 'Content-Type: application/json' \
-  -d '{"ip":"192.168.1.77"}'
+  -d "{\"ip\":\"${GHOST}\"}" | python3 -m json.tool
 ```
 
-**Output :**
+**Output type :**
 ```json
 {
   "ip": "192.168.1.77",
   "manufacturer": "Hikvision",
   "model": "DS-2CD2142FWD-I",
-  "firmware": "V5.5.0 build 170123",
-  "serial": "DS-2CD2142FWD-I20180101",
-  "mac": "11:22:33:44:55:66"
+  "firmware": "V5.5.0 build 210628",
+  "serial": "DS-2CD2142FWD-I20210628"
 }
 ```
 
-**Ce que tu apprends :** modèle exact + version firmware. Avec ça, tu peux chercher les CVE associées.
+→ Tu as maintenant **modèle + firmware exact**.
 
----
+### Étape 6 — Note de mission structurée
 
-### Étape 7 — Documenter
+Crée `${MISSION}/RAPPORT_OBSERVATION.md` :
 
-```bash
-# Crée ton rapport
-mkdir -p ~/ghost1o1_ops/2026-07-05_audit_home
-cd ~/ghost1o1_ops/2026-07-05_audit_home
+```markdown
+# Mission Observation — [DATE]
+**Opérateur :** ghost1o1
+**Cible :** 192.168.1.0/24
 
-cat > observations.md << 'EOF'
-# Audit réseau domestique — 2026-07-05
+## Hosts découverts (passive ARP)
+| IP | MAC | Hostname suspecté |
+|----|-----|-------------------|
+| 192.168.1.1 | aa:bb:cc:dd:ee:ff | Gateway |
+| 192.168.1.77 | 11:22:33:44:55:66 | hikvision-cam-1.lan |
+| 192.168.1.88 | 99:88:77:66:55:44 | (à identifier) |
 
-## Réseau
-- Subnet: 192.168.1.0/24
-- Ma machine: 192.168.1.42
-- Passerelle: 192.168.1.1 (TP-Link)
+## Services identifiés (active)
+| IP | Port | Service | Version |
+|----|------|---------|---------|
+| 192.168.1.77 | 80 | HTTP | Hikvision-Webs 5.5.0 |
+| 192.168.1.77 | 554 | RTSP | Hikvision RTSP 5.5.0 |
+| 192.168.1.77 | 8899 | SADP | Hikvision 5.5.0 |
 
-## Devices découverts
-| IP | MAC | Type | Ports ouverts | Services |
-|----|-----|------|---------------|----------|
-| 192.168.1.1 | AA:BB:CC:DD:EE:FF | Routeur TP-Link | 80, 443 | HTTP/HTTPS |
-| 192.168.1.42 | ma MAC | Mon laptop | - | - |
-| 192.168.1.77 | 11:22:33:44:55:66 | Hikvision DS-2CD2142FWD-I | 80, 554, 8899 | HTTP/RTSP/SADP |
-| 192.168.1.88 | 22:33:44:55:66:77 | Dahua IPC | 80, 37777 | HTTP/Dahua DVR |
+## Points d'attention
+- ⚠️ Firmware V5.5.0 : vérifier CVE-2021-36260 (RCE)
+- ⚠️ Port 8899 (SADP) exposé sur LAN : informations leak
+- ⚠️ RTSP sans auth visible : tester accès direct
 
-## Findings
-- 2 caméras avec credentials par défaut potentiels
-- 1 routeur grand public (vulnérabilités possibles selon modèle)
-- Firmware Hikvision V5.5.0 (build 170123) = ancien, vérifier CVE
-
-## Prochaines étapes
-- Phase 2 (Cartographier) : scan complet + identification CVE
-EOF
+## Prochaine étape (phase 2)
+- Cartographier les relations entre ces 3 hosts
+- Identifier les credentials par défaut
+- Tester les CVE potentielles
 ```
 
-**Ce que tu apprends :** tu as un rapport structuré, daté, exploitable pour la phase 2.
+### Étape 7 — Sauvegarde la mission
+
+```bash
+# Archive
+cd ~
+tar czf mission_observer_$(date +%Y%m%d).tar.gz mission_observer/
+
+# Copie vers un endroit safe (cloud, USB, second disk)
+```
 
 ---
 
 ## 5. PIÈGES — Ce qui va casser
 
-| Piège | Symptôme | Solution |
-|-------|----------|----------|
-| Scan `-p-` sur /24 | Trop lent, détection IDS | Utilise `-T4` + ports ciblés |
-| WiFi désynchronisé | Perte de packets, scans incomplets | `ping -c 5 8.8.8.8` pour vérifier |
-| Routeur qui bloque ICMP | `nmap -sn` voit 0 host | Utilise `arp-scan` à la place |
-| Permissions insuffisantes | `nmap: operation not permitted` | `sudo nmap ...` |
-| Firewall sur la cible | Ports fermés alors qu'ils sont ouverts | Le firewall bloque SYN scan, essaie `-sT` |
-| Faux positifs | nmap voit un port ouvert mais il ne répond pas | Vérifie avec `nc -zv IP PORT` |
-| Interface WiFi en mode monitor | nmap ne scan qu'eth0 | `iwconfig` pour vérifier |
+### Piège 1 : Scanner trop large
+
+**Symptôme :** tu lances `nmap -p- 192.168.1.0/24` et tu obtiens 50 alertes IDS.
+
+**Solution :** scan ciblé par sous-réseau ou par host :
+```bash
+# Mauvais
+nmap -p- 192.168.1.0/24
+
+# Bon
+nmap -sn 192.168.1.0/24  # ping sweep d'abord
+nmap -sV 192.168.1.77      # puis ciblé
+```
+
+### Piège 2 : Oublier le DNS
+
+**Symptôme :** tu as 5 hosts up mais tu ne sais pas qui est quoi.
+
+**Solution :** toujours faire le reverse DNS en étape 4.
+```bash
+# Crée un mapping IP → hostname
+for ip in $(cat hosts.txt); do
+  echo "$ip $(dig -x $ip +short)"
+done
+```
+
+### Piège 3 : Scanner sans horodater
+
+**Symptôme :** tu ne sais plus quand tu as scanné quoi, et la cible a peut-être changé.
+
+**Solution :** chaque commande de scan doit être horodatée.
+```bash
+echo "[$(date -Iseconds)] nmap -sV ${IP}" >> mission.log
+nmap -sV ${IP} | tee -a mission.log
+```
+
+### Piège 4 : Ignorer IPv6
+
+**Symptôme :** la cible a IPv6 actif mais tu n'as scanné qu'IPv4.
+
+**Solution :** au minimum, identifie si IPv6 est utilisé :
+```bash
+ping6 ff02::1%eth0  # multicast, liste tous les hosts IPv6 sur le lien
+```
+
+### Piège 5 : Oublier de sauvegarder
+
+**Symptôme :** tu perds tes notes après un crash ou un reboot.
+
+**Solution :** **toujours** archiver la mission à la fin.
 
 ---
 
 ## 6. ALTERNATIVES — 3 autres approches
 
-### Approche A — `arp-scan` (le plus rapide pour ARP pur)
-```bash
-sudo arp-scan 192.168.1.0/24
-```
-**Avantage :** ultra rapide, fonctionne même si ICMP est bloqué
-**Inconvénient :** ne donne pas l'OS ni les services
+### Alternative A — Automatisée avec GHOSTEYE
 
-### Approche B — `netdiscover` (avec UI live)
 ```bash
-sudo netdiscover -r 192.168.1.0/24
-```
-**Avantage :** visuel, bon pour démos
-**Inconvénient :** passif par défaut, moins précis que nmap
-
-### Approche C — ghosteye (intégré)
-```bash
+# Discovery + ONVIF + RTSP brute en une commande
 python3 ghosteye_proxy.py 8082 &
-curl -X POST http://localhost:8082/scan/ports \
-  -H 'Content-Type: application/json' \
-  -d '{"target":"192.168.1.0/24","ports":[80,554,8899,37777]}'
+sleep 2
+curl -X POST http://localhost:8082/onvif/discover -H 'Content-Type: application/json' -d '{}'
+curl -X POST http://localhost:8082/rtsp/brute -H 'Content-Type: application/json' -d '{"ip":"192.168.1.77"}'
 ```
-**Avantage :** un seul outil, dashboard intégré, ONVIF auto
-**Inconvénient :** moins complet que nmap pour OS detection
 
-**Mon choix :** **combo des 3**. `arp-scan` pour le quick win, `nmap -sV` pour la précision, `ghosteye` pour l'ONVIF.
+**Avantage :** tout en un, plus rapide. **Limite :** moins granulaire que la méthode manuelle.
+
+### Alternative B — Nmap scripting engine (NSE)
+
+```bash
+# Utilise les scripts Nmap pour aller plus loin
+nmap --script=http-enum,http-title,ssl-cert -p 80,443 192.168.1.77
+```
+
+**Avantage :** extensible, scripts communautaires. **Limite :** certains scripts sont bruyants.
+
+### Alternative C — Avec Masscan (très rapide)
+
+```bash
+# Masscan = nmap en 100x plus rapide (mais moins précis)
+sudo masscan -p1-65535 192.168.1.0/24 --rate=1000
+```
+
+**Avantage :** scanne un /16 en minutes. **Limite :** très bruyant, facile à détecter.
+
+**Règle de divergence :** essaie au moins 2 méthodes différentes sur la même cible. Compare les résultats.
 
 ---
 
 ## 7. TRANSMISSION — Ton exercise
 
-### Exercice 1 — Audit ton réseau domestique
-1. Fais les 7 étapes ci-dessus sur ton propre réseau
-2. Documente tout dans `~/ghost1o1_ops/DATE_audit_home/observations.md`
-3. Identifie **au moins 1 device** avec un firmware ancien ou credentials par défaut
+### 🎯 Mission à accomplir
 
-### Exercice 2 — Compare les 3 approches
-1. Refais l'étape 3 (scan /24) avec `nmap -sn`, `arp-scan`, et `netdiscover`
-2. Note les différences : vitesse, résultats, bruit
-3. **Publie** ta comparaison en issue sur [github.com/187Ghost101/ghost1o1](https://github.com/187Ghost101/ghost1o1)
+**Trouve 1 CVE exploitable sur une caméra IoT de ton réseau, en suivant UNIQUEMENT la phase 1 du protocole.**
 
-### Exercice 3 — Identifie 1 CVE réelle
-1. Prends le modèle de caméra trouvé (ex: Hikvision DS-2CD2142FWD-I V5.5.0)
-2. Cherche sur [cve.mitre.org](https://cve.mitre.org) les CVE associées
-3. Vérifie si ta caméra est vulnérable
-4. **Publie** ton finding (anonymisé) en discussion
+**Étapes :**
+1. **Observe** : scan passif + actif de ton LAN
+2. **Identifie** : au moins 1 caméra IoT (Hikvision, Dahua, ou autre)
+3. **Documente** : sa marque, modèle, firmware
+4. **Matche** : trouve au moins 1 CVE correspondante (cherche sur nvd.nist.gov ou cvedetails.com)
+5. **Note** : si tu devais l'exploiter, par où tu commencerais (sans le faire)
 
-### Pourquoi la section 7 existe
+**Livrable :** publie un fichier `MISSION_OBSERVATION.md` sur ton propre repo ou gist, avec :
+- Hosts découverts
+- Services identifiés
+- Modèle + firmware + CVE
+- Notes sur la suite
 
-> *"Celui qui sait et ne transmet pas trahit sa propre maîtrise."*
+### 📤 Comment transmettre
 
-T'as fait le tutoriel. T'as le savoir. Si tu le gardes, il meurt avec la session. Si tu le publies, il aide 1000 autres. **Transmettre, c'est pas de la charité. C'est un devoir de discipline.**
+- Crée un gist : https://gist.github.com
+- Push sur ton propre repo
+- Partage le lien dans les Discussions de GHOST1O1 : https://github.com/187Ghost101/ghost1o1/discussions
+
+### 🏅 Crédits
+
+Les transmissions sont **nommées** dans le repo. Si ton travail est solide, tu es crédité dans le CHANGELOG et dans la page Contributors.
+
+**C'est ça, la transmission. C'est pas optionnel. C'est la 5e phase du protocole.**
 
 ---
 
 ## 📚 Pour aller plus loin
 
-- **TUTORIAL_02** — CARTOGRAPHIER : du device au graphe d'attaque
-- **TUTORIAL_03** — INSTRUMENTER : choisis tes outils, construis ta trousse
-- **ghosteye** : [github.com/187Ghost101/ghosteye](https://github.com/187Ghost101/ghosteye)
-- **Protocole complet** : [PROTOCOL.md](https://github.com/187Ghost101/ghost1o1/blob/main/PROTOCOL.md)
-- **Manifeste** : [MANIFESTO.md](https://github.com/187Ghost101/ghost1o1/blob/main/MANIFESTO.md)
+- **TUTORIAL 02 — CARTOGRAPHIER** : la phase suivante
+- **ghosteye/README.md** : l'outil utilisé dans ce tuto
+- **PROTOCOL.md** : la méthodologie complète
 
 ---
 
-*"There is no lock." — ghost1o1*
+## 📜 Sources & Références
 
-**Signé : ghost1o1 — 2026-07-05 — Pour ceux qui osent apprendre.**
+- [Nmap Reference Guide](https://nmap.org/book/man.html)
+- [NIST CVE Database](https://nvd.nist.gov/)
+- [Hikvision Security Advisories](https://www.hikvision.com/en/support/cybersecurity/)
+- [Sans IoT Security Resources](https://www.sans.org/iot-security/)
+
+---
+
+<div align="center">
+
+**L'ÉVEIL NOCTURNE** · [ghost1o1](https://github.com/187Ghost101) — 2026
+
+*There is no lock. Du silence naît la lumière.*
+
+</div>
