@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>L'ÉVEIL NOCTURNE — Widget</title>
+<style>
+:root{--bg:#0a0a0f;--bg2:#0f0f1a;--border:#1a1a35;--accent:#e63946;--gold:#f4a261;--cyan:#00d4ff;--lunar:#e8e8f0;--text2:#8888a0;--font:'JetBrains Mono','Consolas',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--lunar);font-family:var(--font);padding:20px;display:flex;align-items:center;justify-content:center;min-height:100vh}
+.widget{max-width:380px;width:100%;background:linear-gradient(135deg,var(--bg2) 0%,#141428 100%);border:1px solid var(--border);border-radius:8px;padding:24px;position:relative;overflow:hidden}
+.widget::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.sigil{text-align:center;color:var(--gold);font-size:11px;line-height:1.2;margin-bottom:16px;text-shadow:0 0 20px rgba(244,162,97,0.3);white-space:pre}
+.sigil .eye{color:var(--accent);animation:blink 3s ease-in-out infinite}
+@keyframes blink{0%,90%,100%{opacity:1}95%{opacity:0.2}}
+.title{text-align:center;font-size:14px;color:var(--gold);letter-spacing:2px;margin-bottom:6px}
+.tagline{text-align:center;font-size:10px;color:var(--text2);font-style:italic;margin-bottom:20px}
+.tagline em{color:var(--cyan);font-style:normal}
+.serment{background:rgba(0,0,0,0.3);border-left:2px solid var(--accent);padding:12px 14px;margin-bottom:20px;font-size:10px;line-height:1.7}
+.serment div{color:var(--text2);margin-bottom:4px}
+.serment div:last-child{margin-bottom:0}
+.cta{display:block;text-align:center;background:var(--accent);color:#fff;padding:10px 16px;text-decoration:none;border-radius:4px;font-size:11px;text-transform:uppercase;letter-spacing:2px;transition:all 0.2s}
+.cta:hover{background:#c0392b;transform:translateY(-1px)}
+.meta{text-align:center;margin-top:16px;font-size:9px;color:var(--text2);letter-spacing:1px}
+</style>
+</head>
+<body>
+
+<div class="widget">
+<pre class="sigil">
+      ☾
+     ╱ ╲
+    ╱   ╲
+   │  <span class="eye">◉</span>  │
+   │     │    L'ÉVEIL
+    ╲   ╱     NOCTURNE
+     ╲ ╱
+      ╳
+</pre>
+
+<div class="title">— Le Serment —</div>
+<div class="tagline"><em>There is no lock.</em></div>
+
+<div class="serment">
+  <div>✦ Je ne cache pas.</div>
+  <div>✦ Je ne détruis pas.</div>
+  <div>✦ Je ne mens pas.</div>
+  <div>✦ Je ne gates pas.</div>
+</div>
+
+<a href="https://github.com/187Ghost101/ghost1o1" class="cta">Rejoindre le mouvement</a>
+
+<div class="meta">ghost1o1 · 2026 · MIT License</div>
+</div>
+
+</body>
+</html>
