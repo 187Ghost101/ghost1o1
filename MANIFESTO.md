@@ -1,6 +1,7 @@
-# 🔱 MANIFESTE GHOST1O1 NOCTURNE
+# 🔱 MANIFESTE — L'ÉVEIL NOCTURNE
 
 > *There is no lock.*
+> *Du silence naît la lumière.*
 
 ---
 
@@ -43,7 +44,22 @@ Celui qui sait et ne transmet pas **trahit sa propre maîtrise**. La vraie exper
 
 ---
 
-## IV. Ce que nous construisons
+## IV. Le Mouvement — L'ÉVEIL NOCTURNE
+
+L'ÉVEIL NOCTURNE n'est pas un projet. C'est un **mouvement**.
+
+Comme l'Éveil des consciences au siècle des Lumières — mais numériques, underground, nécessaires.
+
+**Trois noms pour une seule idée :**
+- **GHOST1O1** — la signature, l'identité publique
+- **L'Éveil Nocturne** — le mouvement, la philosophie
+- **NOCTURNE** — l'appel court, l'argot du mouvement
+
+**Une phrase signature :** *« Là où l'ignorance dort, nous allumons. »*
+
+**Un serment :** *« Je ne cache pas. Je ne détruis pas. Je ne mens pas. Je ne gates pas. »*
+
+## V. Ce que nous construisons
 
 Un **système d'éducation et d'outillage** où :
 
@@ -54,7 +70,7 @@ Un **système d'éducation et d'outillage** où :
 
 ---
 
-## V. Qui est ghost1o1
+## VI. Qui est ghost1o1
 
 Un **divergent**. Pas un professeur, pas un gourou. Un opérateur qui apprend en public, documente tout, et refuse la culture du secret.
 
@@ -64,7 +80,7 @@ C'est ce manque-là qu'on remplit.
 
 ---
 
-## VI. L'engagement
+## VII. L'engagement
 
 Si tu rejoins GHOST1O1 — comme lecteur, comme contributeur, comme élève — tu acceptes :
 
@@ -75,7 +91,7 @@ Si tu rejoins GHOST1O1 — comme lecteur, comme contributeur, comme élève — 
 
 ---
 
-## VII. La phrase
+## VIII. La phrase
 
 > **"There is no lock."**
 
@@ -83,4 +99,4 @@ Pas une métaphore de destruction. Une **constatation opérationnelle** : chaque
 
 ---
 
-*Forged in the dark — 2026*
+*L'ÉVEIL NOCTURNE — Forged in the dark — 2026*
